@@ -1,8 +1,8 @@
 import {configureStore} from '@reduxjs/toolkit'
-import rootReducer from './rootReducer'
+import combineReducers from './rootReducer_GoogleKeep'
 
 const store = configureStore({
-    reducer: rootReducer
+    reducer: combineReducers
 });
 
 export default store;

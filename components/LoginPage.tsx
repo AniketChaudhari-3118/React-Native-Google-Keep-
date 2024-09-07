@@ -1,14 +1,26 @@
 
 import { TextInput } from 'react-native-paper'
-import { Image, Pressable, StyleSheet, Text, TouchableHighlight, View } from 'react-native';
+import { Image, Pressable, Text, TouchableHighlight, View } from 'react-native';
 import { useState } from 'react';
-import { styles } from './GoogleKeepLoginCss'
+import { styles } from './LoginCss'
+import auth from '@react-native-firebase/auth'
 
-export const LoginPage = (props : any) => {
+
+export const LoginPage = (props: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const onLogin = () => {
+    auth().signInWithEmailAndPassword("shantanu256@gmail.com", "shantanu@256").then(() => {
+      props.navigation.navigate('DrawerView');
+      
+    }).catch((error) => {
+      console.log(error);
+    })
+  }
   return (
+
+
     <View style={styles.main}>
 
       <View style={styles.loginView}>
@@ -25,15 +37,17 @@ export const LoginPage = (props : any) => {
           secureTextEntry // Hide password input
           mode="outlined" />
 
-        <Pressable style={styles.login} onPress={() => props.navigation.navigate('DrawerView')}>
+        <Pressable style={styles.login} onPress={() => onLogin()}>
           <Text style={styles.text_login} >login</Text>
+        </Pressable>
+
+        <Pressable style={styles.text_Signin} onPress={() => props.navigation.navigate("Signin")}>
+          <Text style={styles.text_login} >Signin</Text>
         </Pressable>
 
         <View style={{ flexDirection: 'row' }}>
           <Text style={styles.login_With}>Login with:</Text>
           <View style={{ flexDirection: 'row', marginTop: 17 }}>
-            <View style={{ height: 20, padding: 2 }}><Image source={require('../images/FacebookImage.png')} style={styles.image} /></View>
-            <View style={{ height: 20, padding: 2 }}><Image source={require('../images/icons8-gmail-logo-48.png')} style={styles.image} /></View>
             <View style={{ height: 20, padding: 2 }}><Image source={require('../images/icons8-google-plus-50.png')} style={styles.image} /></View>
           </View>
         </View>

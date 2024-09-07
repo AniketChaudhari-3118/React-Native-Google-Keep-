@@ -1,32 +1,47 @@
 // components/GoogleKeepInterface.tsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import BottomTab from './BottomView';
+import { useSelector } from 'react-redux';
+import firestore from '@react-native-firebase/firestore';
 
 
 export const GoogleKeepInterface = (props: any) => {
   const [listView, setListView] = useState(false);
+  const [notes, setNotes] = useState([{}]);
 
-  const notes = [
-    {
-      Title: 'Aniket',
-      Discription: "Loves to play football"
-    },
-    {
-      Title: 'Devendra',
-      Discription: "Is a Software Developer"
-    },
-    {
-      Title: 'Pranit',
-      Discription: "Works at a Automobile Company"
-    },
-    {
-      Title: 'Shantanu',
-      Discription: "He is a great App Developer"
-    }
-  ]
+  const NotesData: any = useSelector((state: any) => state.reducer);
+  //console.warn(NotesData);
+
+  const notesPinned = NotesData.filter((note: any) => note.isPinned);
+  const notesOthers = NotesData.filter((note: any) => !note.isPinned);
+
+  useEffect(() => {
+    // Define an async function inside useEffect
+    const fetchNotes = async () => {
+      try {
+        const notesCollection = await firestore()
+          .collection('Notes Data')  // Replace with your collection name
+          .get();  // Get all documents in the collection
+
+        // Process the documents
+        const notesData = notesCollection.docs.map(doc => ({
+          title: doc.data().title,  // Get the title field
+          description: doc.data().description,  // Get the description field
+        }));
+
+        // console.warn(notesData);
+        setNotes(notesData);  // Update the state with the fetched notes
+      } catch (error) {
+        console.error("Error fetching notes: ", error);
+      }
+    };
+
+    // Call the async function
+    fetchNotes();
+  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -36,31 +51,31 @@ export const GoogleKeepInterface = (props: any) => {
         <View style={styles.SearchBar}>
 
           {/*Drawer Button*/}
-          <Pressable style={{ flex: 1, height: '80%', width: '100%', marginLeft: 15, marginBottom: 5 }} onPress={() => props.navigation.openDrawer()} >
-            <Text style={{ textAlign: 'center', fontSize: 30 }}>&#9776;</Text>
+          <Pressable style={styles.DrawerButton} onPress={() => props.navigation.openDrawer()} >
+            <Text style={styles.DrawerButtonText}>&#9776;</Text>
           </Pressable>
 
           {/*Text Input (Search)*/}
           <TextInput
-            style={{ fontSize: 20, flex: 7, marginLeft: 8 }}
+            style={styles.TextInputSearch}
             placeholder="Search your notes" />
 
           {/*ListView and GridView buttons*/}
-          <Pressable onPress={() => setListView(!listView)} style={{ flex: 1.5, height: "60%", marginRight: 20 }}>
+          <Pressable onPress={() => setListView(!listView)} style={styles.ListGridView}>
             {listView ? (
-              <Image style={{ flex: 1.5, width: '100%', marginRight: 45 }}
+              <Image style={styles.GridView}
                 source={require('../images/grid.png')} // Display list view image
               />
             ) : (
-              <Image style={{ flex: 1.5, width: '100%',height: "50%", marginRight: 45 }}
+              <Image style={styles.ListView}
                 source={require('../images/ListView.png')} // Display grid view image
               />
             )}
           </Pressable>
 
           {/*account button image*/}
-          <Pressable style={{ flex: 1.5, height: "80%", width: "40%", marginRight: 30 }}>
-            <Image style={{ height: "100%", width: "100%", borderRadius: 25 }}
+          <Pressable style={styles.AccountImagePress}>
+            <Image style={styles.AccountImage}
               source={require('../images/photo.png')} // Display list view image
             />
           </Pressable>
@@ -76,8 +91,8 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ marginBottom: 15 }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notes.map((item) => <Text style={styles.item}>
-                      {`${item.Title} \n\n ${item.Discription}`}</Text>)
+                    NotesData.map((item: any) => <Text style={styles.item}>
+                      {`${item.title} \n\n ${item.notes}`}</Text>)
                   }
                 </View>
               </View>
@@ -87,7 +102,7 @@ export const GoogleKeepInterface = (props: any) => {
               < View style={{ marginBottom: 10 }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notes.map((item) => <Text style={styles.item}>{item.Title}</Text>)
+                    notesOthers.map((item: any) => <Text style={styles.item}>{`${item.title} \n\n ${item.notes}`}</Text>)
                   }
                 </View>
               </View>
@@ -97,8 +112,8 @@ export const GoogleKeepInterface = (props: any) => {
               <Text style={{ fontSize: 20, marginLeft: 13, marginTop: 5 }}>Pinned</Text>
               <View style={{ marginBottom: 15 }}>
                 <View style={{ flex: 1 }}>
-                  {notes.map((item) => <Text style={styles.itemListView}>
-                    {`${item.Title} \n\n ${item.Discription}`}</Text>)}
+                  {notesPinned.map((item: any) => <Text style={styles.itemListView}>
+                    {`${item.title} \n\n ${item.notes}`}</Text>)}
                 </View>
               </View>
 
@@ -106,8 +121,8 @@ export const GoogleKeepInterface = (props: any) => {
               <Text style={{ fontSize: 20, marginLeft: 13, marginTop: 5 }}>Others</Text>
               <View style={{ marginBottom: 15 }}>
                 <View style={{ flex: 1 }}>
-                  {notes.map((item) => <Text style={styles.itemListView}>
-                    {`${item.Title} \n\n ${item.Discription}`}</Text>)}
+                  {notesOthers.map((item: any) => <Text style={styles.itemListView}>
+                    {`${item.title} \n\n ${item.notes}`}</Text>)}
                 </View>
               </View>
             </>
@@ -145,6 +160,49 @@ const styles = StyleSheet.create({
     backgroundColor: "aliceblue",
     borderWidth: 0.5
   },
+  DrawerButton: {
+    flex: 1,
+    height: '80%',
+    width: '100%',
+    marginLeft: 15,
+    marginBottom: 5
+  },
+  DrawerButtonText: {
+    textAlign: 'center',
+    fontSize: 30
+  },
+  TextInputSearch: {
+    fontSize: 20,
+    flex: 7,
+    marginLeft: 8
+  },
+  ListGridView: {
+    flex: 1.5,
+    height: "60%",
+    marginRight: 20
+  },
+  GridView: {
+    flex: 1.5,
+    width: '100%',
+    marginRight: 45
+  },
+  ListView: {
+    flex: 1.5,
+    width: '100%',
+    height: "50%",
+    marginRight: 45
+  },
+  AccountImagePress: {
+    flex: 1.5,
+    height: "80%",
+    width: "40%",
+    marginRight: 30
+  },
+  AccountImage: {
+    height: "100%",
+    width: "100%",
+    borderRadius: 25
+  },
   item: {
     borderWidth: 0.5,
     borderRadius: 10,
@@ -178,7 +236,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 40,
+    height: 60,
     backgroundColor: 'red',
     color: 'red',
     shadowColor: '#CCCCFF',

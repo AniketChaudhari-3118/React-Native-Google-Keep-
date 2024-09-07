@@ -18,11 +18,13 @@ function BottomTab() {
             screenOptions={{
                 tabBarStyle: {
                     backgroundColor: "#CCCCFF", // Background color of the tab bar
-                }
+                },
+                tabBarShowLabel: false, // Hide the label names
             }}
         >
             <Tab.Screen name='New List' component={NewList} options={{
                 headerShown: false,
+                tabBarShowLabel: false, // Hide the label names
                 tabBarIcon: ({ color, size }) => (
                     <Image
                         source={require('../images/check.png')}
@@ -39,6 +41,7 @@ function BottomTab() {
 
             <Tab.Screen name='New Drawing Note' component={NewDrawingNote} options={{
                 headerShown: false,
+                tabBarShowLabel: false, // Hide the label names
                 tabBarIcon: ({ color, size }) => (
                     <Image
                         source={require('../images/PaintingBrush.png')}
@@ -55,6 +58,7 @@ function BottomTab() {
 
             <Tab.Screen name='New Audio Note' component={NewAudioNote} options={{
                 headerShown: false,
+                tabBarShowLabel: false, // Hide the label names
                 tabBarIcon: ({ color, size }) => (
                     <Image
                         source={require('../images/mic.png')}
@@ -71,6 +75,7 @@ function BottomTab() {
 
             <Tab.Screen name='New Photo Note' component={NewPhotoNote} options={{
                 headerShown: false,
+                tabBarShowLabel: false, // Hide the label names
                 tabBarIcon: ({ color, size }) => (
                     <Image
                         source={require('../images/gallery.png')}

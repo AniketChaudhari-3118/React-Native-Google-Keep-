@@ -33,7 +33,9 @@ function BottomTab() {
     return (
         <Tab.Navigator screenOptions={{
             headerStyle: {
-                backgroundColor: '"aliceblue"'
+                backgroundColor: '"aliceblue"',
+                shadowColor: 'black',
+                elevation: 3
             },
         }}>
 

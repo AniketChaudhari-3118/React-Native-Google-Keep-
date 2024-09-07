@@ -8,9 +8,10 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { SigninPage } from './components/SigninPage'
 import { LoginPage } from './components/LoginPage'
 import { DrawerView } from './components/DrawerView'
-import { Header } from './components/AddNoteView';
+// import { Header } from './components/AddNoteView';
 import { AddNote } from './components/AddNoteView';
 
 
@@ -21,8 +22,24 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
+
         <Stack.Screen name='LoginPage' component={LoginPage} options={{
           title: 'Login',
+          headerStyle: {
+            backgroundColor: 'orange',
+          },
+          headerTintColor: 'black',
+          headerTitleStyle: {
+            fontSize: 35,
+            color: 'black',
+            fontWeight: '800'
+          },
+          headerTitleAlign: 'center'
+        }}
+        />
+
+        <Stack.Screen name='Signin' component={SigninPage} options={{
+          title: 'Signin',
           headerStyle: {
             backgroundColor: 'orange',
           },
@@ -40,7 +57,7 @@ function App() {
 
         <Stack.Screen name='AddNote' component={AddNote} options={{
           headerShown: true,
-          headerRight: () => <Header />,
+          // headerRight: () => <Header />,
           headerTitleStyle: {
             fontSize: 25
           }
