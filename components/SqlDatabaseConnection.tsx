@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { HoverGesture } from 'react-native-gesture-handler/lib/typescript/handlers/gestures/hoverGesture';
+
 import SQLite from 'react-native-sqlite-storage';
 import { useSelector } from 'react-redux';
 
 
-const db = SQLite.openDatabase(
+export const db = SQLite.openDatabase(
     {
         name: 'notes.db',
         location: 'default'
@@ -37,8 +36,7 @@ db.transaction((tx) => {
 }
 );
 
-
-export const SendData = () => {
+const SendData = () => {
     const NotesData: any = useSelector((state: any) => state.reducer);
     db.transaction((tx) => {
         tx.executeSql(
@@ -53,3 +51,5 @@ export const SendData = () => {
         );
     });
 }
+
+

@@ -3,11 +3,13 @@ import { Image, Pressable, Text, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import BottomViewAddNote from "./BottomViewAddNote";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addNotesData } from "../ReduxGoogleKeep/action_GoogleKeep";
 import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';  
-import {SendData} from './SqlDatabaseConnection'
+import auth from '@react-native-firebase/auth';
+import { db } from './SqlDatabaseConnection'
+
+
 
 
 export function AddNote() {
@@ -16,12 +18,31 @@ export function AddNote() {
     const [notesData, setNotesData] = useState({ title: "", notes: "", isPinned: false });
     const dispatch = useDispatch();
 
+    const NotesData: any = useSelector((state: any) => state.reducer);
+
+    const SendData = () => {
+
+        db.transaction((tx) => {
+            tx.executeSql(
+                `insert into notes (title, description) values (?, ?)`,
+                [NotesData.title, NotesData.description],
+                () => {
+                    console.warn('Note added Successfully');
+                },
+                (error) => {
+                    console.error('Error adding Note', error);
+                }
+            );
+        });
+    }
+
+
     const handleInputChange = (name: string, value: string) => {
         setNotesDataFirebase((prev) => ({
             ...prev,
             [name]: value,
         }));
-    
+
         setNotesData((prev) => ({
             ...prev,
             [name]: value,
@@ -43,7 +64,7 @@ export function AddNote() {
         console.warn(title, description);
         try {
             const user = auth().currentUser;  // Get the currently authenticated user
-    
+
             if (user) {  // Check if the user is authenticated
                 await firestore()
                     .collection('Notes Data')  // Choose the collection name, e.g., 'Notes'
@@ -61,7 +82,7 @@ export function AddNote() {
             console.error("Error adding note: ", error);
         }
     };
-    
+
 
 
     return (
@@ -87,12 +108,12 @@ export function AddNote() {
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
 
                 {/*Add Note Button*/}
-                <Pressable style={{ marginBottom: 42, backgroundColor: 'skyblue', marginLeft: 25, marginRight: 25, width: 200, alignItems: 'center', padding: 8, borderRadius: 12, shadowColor: 'black', elevation: 3 }} onPress={() => { handleSubmit(); addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes);  }}>
+                <Pressable style={{ marginBottom: 42, backgroundColor: 'skyblue', marginLeft: 25, marginRight: 25, width: 200, alignItems: 'center', padding: 8, borderRadius: 12, shadowColor: 'black', elevation: 3 }} onPress={() => { handleSubmit(); addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes); SendData() }}>
                     <Text style={{ fontSize: 15 }}>Add Note</Text>
                 </Pressable>
 
                 {/*Pin Button*/}
-                <Pressable onPress={() => { handleSubmit(); addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes); }}>
+                <Pressable onPress={() => { handleSubmit(); addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes); SendData() }}>
                     <Image
                         source={require('../images/PinNote.png')}
                         style={{
