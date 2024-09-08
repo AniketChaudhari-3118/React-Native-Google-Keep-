@@ -6,42 +6,30 @@ import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler'
 import BottomTab from './BottomView';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
+import { addNoteToFirestore } from './AddNoteView';
 
 
 export const GoogleKeepInterface = (props: any) => {
-  const [listView, setListView] = useState(false);
-  const [notes, setNotes] = useState([{}]);
+  const [listView, setListView] = useState(true);
+  const [getNotes, setGetNotes] = useState([{}]);
 
-  const NotesData: any = useSelector((state: any) => state.reducer);
+  //const NotesData: any = useSelector((state: any) => state.reducer);
   //console.warn(NotesData);
 
-  const notesPinned = NotesData.filter((note: any) => note.isPinned);
-  const notesOthers = NotesData.filter((note: any) => !note.isPinned);
+  // const notesPinned = NotesData.filter((note: any) => note.isPinned);
+  // const notesOthers = NotesData.filter((note: any) => !note.isPinned);
+  const notesPinned = getNotes;
+  const notesOthers = getNotes;
 
   useEffect(() => {
-    // Define an async function inside useEffect
     const fetchNotes = async () => {
-      try {
-        const notesCollection = await firestore()
-          .collection('Notes Data')  // Replace with your collection name
-          .get();  // Get all documents in the collection
-
-        // Process the documents
-        const notesData = notesCollection.docs.map(doc => ({
-          title: doc.data().title,  // Get the title field
-          description: doc.data().description,  // Get the description field
-        }));
-
-        // console.warn(notesData);
-        setNotes(notesData);  // Update the state with the fetched notes
-      } catch (error) {
-        console.error("Error fetching notes: ", error);
-      }
-    };
-
-    // Call the async function
+      const notesCollection = await firestore().collection('Notes Data').get();
+      setGetNotes(notesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // get the all the data as an object and store all the objects in one array(array of objects)
+    }
     fetchNotes();
-  }, []);
+  }, [addNoteToFirestore])
+
+  // console.warn(getNotes);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -91,8 +79,8 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ marginBottom: 15 }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    NotesData.map((item: any) => <Text style={styles.item}>
-                      {`${item.title} \n\n ${item.notes}`}</Text>)
+                    notesPinned.map((item: any) => <Text style={styles.item}>
+                      {`${item.title} \n\n ${item.description}`}</Text>)
                   }
                 </View>
               </View>
@@ -102,7 +90,7 @@ export const GoogleKeepInterface = (props: any) => {
               < View style={{ marginBottom: 10 }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notesOthers.map((item: any) => <Text style={styles.item}>{`${item.title} \n\n ${item.notes}`}</Text>)
+                    notesOthers.map((item: any) => <Text style={styles.item}>{`${item.title} \n\n ${item.description}`}</Text>)
                   }
                 </View>
               </View>
@@ -113,7 +101,7 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ marginBottom: 15 }}>
                 <View style={{ flex: 1 }}>
                   {notesPinned.map((item: any) => <Text style={styles.itemListView}>
-                    {`${item.title} \n\n ${item.notes}`}</Text>)}
+                    {`${item.title} \n\n ${item.description}`}</Text>)}
                 </View>
               </View>
 
@@ -122,7 +110,7 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ marginBottom: 15 }}>
                 <View style={{ flex: 1 }}>
                   {notesOthers.map((item: any) => <Text style={styles.itemListView}>
-                    {`${item.title} \n\n ${item.notes}`}</Text>)}
+                    {`${item.title} \n\n ${item.description}`}</Text>)}
                 </View>
               </View>
             </>

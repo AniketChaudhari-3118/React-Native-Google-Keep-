@@ -35,21 +35,3 @@ db.transaction((tx) => {
     )
 }
 );
-
-const SendData = () => {
-    const NotesData: any = useSelector((state: any) => state.reducer);
-    db.transaction((tx) => {
-        tx.executeSql(
-            `insert into notes (title, description) values (?, ?)`,
-            [NotesData.title, NotesData.description],
-            () => {
-                console.warn('Note added Successfully');
-            },
-            (error) => {
-                console.error('Error adding Note', error);
-            }
-        );
-    });
-}
-
-
