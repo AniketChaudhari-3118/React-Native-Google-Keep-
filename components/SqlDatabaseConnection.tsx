@@ -5,11 +5,11 @@ import { useSelector } from 'react-redux';
 
 export const db = SQLite.openDatabase(
     {
-        name: 'notes.db',
+        name: 'NotesData.db',
         location: 'default'
     },
     () => {
-        console.log('Database opened Successfully');
+        console.warn('Database opened Successfully');
     },
     (error) => {
         console.error('Error Opening Database', error);
@@ -19,14 +19,14 @@ export const db = SQLite.openDatabase(
 
 db.transaction((tx) => {
     tx.executeSql(
-        `CREATE TABLE IF NOT EXISTS notes (
+        `CREATE TABLE IF NOT EXISTS notesdata (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT,
       description TEXT
     );`,
         [],
         () => {
-            console.log('Table created successfully');
+            console.warn('Table created successfully');
         },
         (error) => {
             console.error('Error creating table', error);

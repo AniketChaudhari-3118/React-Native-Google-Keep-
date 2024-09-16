@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "137348027166",
-    "project_id": "keeplogin-firebase",
-    "storage_bucket": "keeplogin-firebase.appspot.com"
+    "project_number": "985465774033",
+    "project_id": "keep-7a799",
+    "storage_bucket": "keep-7a799.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:137348027166:android:f864d25dd61c59b28f6f0f",
+        "mobilesdk_app_id": "1:985465774033:android:fe94556b12c1e2735ccaf0",
         "android_client_info": {
-          "package_name": "com.projectts"
+          "package_name": "com.projectts.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "985465774033-mr94pg2cd63q5gu9l5836abjhmqbbq7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.projectts.app",
+            "certificate_hash": "ec31a865519ed5903f5070847c245b4db2c7307f"
+          }
+        },
+        {
+          "client_id": "985465774033-d5808cus0jb3gjef34p7h2ee9bm1prd1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyCabLsek2AJ1nVedn8VYtUKCGjTbmS5rzc"
+          "current_key": "AIzaSyD6o5FGiqNKwITP9xjHeSJCfhIX-TObPpM"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "985465774033-d5808cus0jb3gjef34p7h2ee9bm1prd1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

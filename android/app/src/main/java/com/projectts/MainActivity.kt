@@ -1,4 +1,4 @@
-package com.projectts
+package com.projectts.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

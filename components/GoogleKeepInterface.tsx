@@ -4,32 +4,69 @@ import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import BottomTab from './BottomView';
-import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
 import { addNoteToFirestore } from './AddNoteView';
+import auth from '@react-native-firebase/auth';
+import { db } from './SqlDatabaseConnection';
+import NetInfo from "@react-native-community/netinfo";
 
 
 export const GoogleKeepInterface = (props: any) => {
   const [listView, setListView] = useState(true);
-  const [getNotes, setGetNotes] = useState([{}]);
+  const [getNotesIsPinned, setGetNotesIsPinned] = useState([{}]);
+  const [getNotesOthers, setGetNotesOthers] = useState([{}]);
 
   //const NotesData: any = useSelector((state: any) => state.reducer);
   //console.warn(NotesData);
+  //const notesPinned = NotesData.filter((note: any) => note.isPinned);
+  //const notesOthers = NotesData.filter((note: any) => !note.isPinned);
+  const fetchNotesFromLocal = async () => {
+    try {
+      const results = await db.executeSql('SELECT * FROM notes');
+      console.warn(results);
 
-  // const notesPinned = NotesData.filter((note: any) => note.isPinned);
-  // const notesOthers = NotesData.filter((note: any) => !note.isPinned);
-  const notesPinned = getNotes;
-  const notesOthers = getNotes;
+      const rows = results[0].rows;
+      const notes = [];
+      for (let i = 0; i < rows.length; i++) {
+        notes.push(rows.item(i));
+      }
+      return notes;
+    } catch (error) {
+      console.error('Error fetching notes from SQLite: ', error);
+      return [];
+    }
+  }
+
+  const fetchNotesFromFirebase = async () => {
+    const user = auth().currentUser;
+    if (user) {
+      const notesCollectionIsPinned = await firestore().collection('notes').doc(user.uid).collection("doc").where('isPinned', "==", true).get();  // Filter by the user's unique ID
+      // console.warn(notesCollectionIsPinned.docs);
+      const notesCollectionOthers = await firestore().collection('notes').doc(user.uid).collection("doc").where('isPinned', "==", false).get();
+      setGetNotesIsPinned(notesCollectionIsPinned.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // (isPinned) get the all the data as an object and store all the objects in one array(array of objects)
+      setGetNotesOthers(notesCollectionOthers.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // (isPinned) get the all the data as an object and store all the objects in one array(array of objects)
+    } else {
+      console.error('No user is signed in.');
+    }
+  }
+
+  const notesPinned = getNotesIsPinned;
+  const notesOthers = getNotesOthers;
 
   useEffect(() => {
-    const fetchNotes = async () => {
-      const notesCollection = await firestore().collection('Notes Data').get();
-      setGetNotes(notesCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // get the all the data as an object and store all the objects in one array(array of objects)
-    }
-    fetchNotes();
+    NetInfo.fetch().then(async (state) => {
+      if (state.isConnected) {
+        try {
+          fetchNotesFromFirebase();
+        } catch (error) {
+          console.error("Error fetching data from Firebase: ", error);
+        }
+      } else {
+        console.warn("User Offline");
+        setGetNotesIsPinned(await fetchNotesFromLocal());
+      }
+    })
   }, [addNoteToFirestore])
-
-  // console.warn(getNotes);
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -75,8 +112,8 @@ export const GoogleKeepInterface = (props: any) => {
             <>
               {/*Notes View*/}
               {/*Pinned*/}
-              <Text style={{ fontSize: 20, marginLeft: 13, marginTop: 5 }}>Pinned</Text>
-              <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "5%" }}>Pinned</Text>
+              <View style={{ marginBottom: "15%" }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
                     notesPinned.map((item: any) => <Text style={styles.item}>
@@ -86,8 +123,8 @@ export const GoogleKeepInterface = (props: any) => {
               </View>
 
               {/*Others*/}
-              <Text style={{ fontSize: 20, marginLeft: 13 }}>Others</Text>
-              < View style={{ marginBottom: 10 }}>
+              <Text style={{ fontSize: 20, marginLeft: "5%" }}>Others</Text>
+              < View style={{ marginBottom: "100%" }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
                     notesOthers.map((item: any) => <Text style={styles.item}>{`${item.title} \n\n ${item.description}`}</Text>)
@@ -97,8 +134,8 @@ export const GoogleKeepInterface = (props: any) => {
             </>
             : <>
               {/*Pinned*/}
-              <Text style={{ fontSize: 20, marginLeft: 13, marginTop: 5 }}>Pinned</Text>
-              <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "5%" }}>Pinned</Text>
+              <View style={{ marginBottom: "0%" }}>
                 <View style={{ flex: 1 }}>
                   {notesPinned.map((item: any) => <Text style={styles.itemListView}>
                     {`${item.title} \n\n ${item.description}`}</Text>)}
@@ -106,8 +143,8 @@ export const GoogleKeepInterface = (props: any) => {
               </View>
 
               {/*Others*/}
-              <Text style={{ fontSize: 20, marginLeft: 13, marginTop: 5 }}>Others</Text>
-              <View style={{ marginBottom: 15 }}>
+              <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "20%" }}>Others</Text>
+              <View style={{ marginBottom: "50%" }}>
                 <View style={{ flex: 1 }}>
                   {notesOthers.map((item: any) => <Text style={styles.itemListView}>
                     {`${item.title} \n\n ${item.description}`}</Text>)}
@@ -197,10 +234,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     backgroundColor: 'ghostwhite',
     color: '#000',
-    margin: 4,
-    marginLeft: 16,
+    margin: 10,
+    marginLeft: "6%",
     padding: 11,
-    width: 170,
+    width: "40%",
     height: 100,
     shadowColor: 'black',
     elevation: 5
@@ -212,9 +249,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'ghostwhite',
     color: '#000',
     margin: 4,
-    marginLeft: 20,
+    marginLeft: "5%",
     padding: 11,
-    width: 352,
+    width: "90%",
     height: 100,
     shadowColor: 'black',
     elevation: 5
@@ -248,3 +285,5 @@ const styles = StyleSheet.create({
   },
 
 })
+
+

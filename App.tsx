@@ -57,7 +57,7 @@ function App() {
 
         <Stack.Screen name='AddNote' component={AddNote} options={{
           headerShown: true,
-          // headerRight: () => <Header />,
+          // headerLeft: () => <Header />,
           headerTitleStyle: {
             fontSize: 25
           }

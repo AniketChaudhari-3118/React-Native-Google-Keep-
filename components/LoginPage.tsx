@@ -10,16 +10,16 @@ export const LoginPage = (props: any) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const onLogin = () => {
-    auth().signInWithEmailAndPassword("shantanu256@gmail.com", "shantanu@256").then(() => {
-      props.navigation.navigate('DrawerView');
-      
-    }).catch((error) => {
-      console.log(error);
-    })
+  const onLogin = async () => {
+    try {
+      const userCredential = await auth().signInWithEmailAndPassword("ra@gm.com", "pass123");
+      const uid = userCredential.user.uid;  // This is the unique ID for the user
+      props.navigation.navigate('DrawerView')
+    } catch (error) {
+      console.error('Error Loging in:', error);
+    }
   }
   return (
-
 
     <View style={styles.main}>
 
@@ -51,14 +51,16 @@ export const LoginPage = (props: any) => {
             <View style={{ height: 20, padding: 2 }}><Image source={require('../images/icons8-google-plus-50.png')} style={styles.image} /></View>
           </View>
         </View>
+
+        <View style={styles.termsView}>
+          <TouchableHighlight style={styles.btn2}>
+            <Text style={styles.terms}>Terms & Conditions</Text>
+          </TouchableHighlight>
+        </View>
+
       </View>
 
-      <View style={styles.termsView}>
-        <TouchableHighlight style={styles.btn2}>
-          <Text style={styles.terms}>Terms & Conditions</Text>
-        </TouchableHighlight>
 
-      </View>
 
     </View>
   )

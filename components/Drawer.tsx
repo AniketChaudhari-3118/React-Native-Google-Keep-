@@ -135,7 +135,7 @@ const CreateNewLabel = () => {
 const Archive = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ fontSize: 30 }}>Settings</Text>
+      <Text style={{ fontSize: 30 }}>Archive</Text>
     </View>
   );
 }

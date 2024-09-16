@@ -1,4 +1,4 @@
-package com.projectts
+package com.projectts.app
 
 import android.app.Application
 import com.facebook.react.PackageList
