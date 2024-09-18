@@ -10,7 +10,7 @@ import auth from '@react-native-firebase/auth';
 import { db } from './SqlDatabaseConnection'
 
 
-export const addNoteToFirestore = async (title: string, description: string, isPinned: boolean) => {
+export const addNoteToFirestore = async (title: string, description: string, isPinned: boolean, archive: boolean) => {
 
     const db = getFirestore();
     const user = auth().currentUser;  // Get the currently authenticated user
@@ -22,9 +22,10 @@ export const addNoteToFirestore = async (title: string, description: string, isP
                 title: title,
                 description: description,
                 isPinned: isPinned,
+                archive: archive,
                 createdAt: firestore.FieldValue.serverTimestamp(), // To store the time of creation
             })
-            console.log('Note added!');
+            console.warn('Note added in Firebase');
         } else {
             console.warn('No user is signed in.');
         }
@@ -49,7 +50,7 @@ export function AddNote() {
                 `insert into notesdata (title, description) values (?, ?)`,
                 [notesData.title, notesData.notes],
                 () => {
-                    console.warn('Note added Successfully');
+                    console.warn('Note added Successfully in SQLite');
                 },
                 (error) => {
                     console.error('Error adding Note', error);
@@ -73,36 +74,29 @@ export function AddNote() {
 
     const handleSubmitAddNote = () => {
         if (notesData.title.trim() !== "" || notesData.notes.trim() !== "") {
-            setNotesDataFirebase((prev) => ({ ...prev, isPinned: false, archive: false }));
-            addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned);
             dispatch(addNotesData(notesData));
-            setNotesData({ title: "", notes: "", isPinned: false, archive: true  }); // Reset the form after submission
+            setNotesData({ title: "", notes: "", isPinned: false, archive: true }); // Reset the form after submission
         } else {
-            console.warn("Note is empty, not submitting.");
+            console.error("Note is empty, not submitting.");
         }
     };
 
     const handleSubmitPinNote = () => {
         if (notesData.title.trim() !== "" || notesData.notes.trim() !== "") {
-            setNotesDataFirebase((prev) => ({ ...prev, isPinned: true, archive: false }))
             dispatch(addNotesData(notesData));
             setNotesData({ title: "", notes: "", isPinned: false, archive: false }); // Reset the form after submission
-            addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned);
         } else {
-            console.warn("Note is empty, not submitting.");
+            console.error("Note is empty, not submitting.");
         }
     };
 
     const handleSubmitArchiveNote = () => {
         if (notesData.title.trim() !== "" || notesData.notes.trim() !== "") {
-            setNotesDataFirebase((prev) => ({ ...prev, isPinned: true, archive: true}))
             setNotesData({ title: "", notes: "", isPinned: false, archive: false }); // Reset the form after submission
-            addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned);
         } else {
-            console.warn("Note is empty, not submitting.");
+            console.error("Note is empty, not submitting.");
         }
     };
-
 
     return (
         <View>
@@ -130,7 +124,7 @@ export function AddNote() {
                 <Pressable style={{ marginBottom: 42, backgroundColor: 'skyblue', marginLeft: "5%", marginRight: "5%", width: "50%", alignItems: 'center', padding: 8, borderRadius: 12, shadowColor: 'black', elevation: 3 }}
                     onPress={() => {
                         handleSubmitAddNote();
-                        addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned = false); SendData()
+                        addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned = false, notesDataFirebase.archive = false); SendData()
                     }}>
                     <Text style={{ fontSize: 15 }}>Add Note</Text>
                 </Pressable>
@@ -138,7 +132,7 @@ export function AddNote() {
                 {/*Pin Button*/}
                 <Pressable onPress={() => {
                     handleSubmitPinNote();
-                    addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned = true); SendData()
+                    addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned = true, notesDataFirebase.archive = false); SendData()
                 }}>
                     <Image
                         source={require('../images/PinNote.png')}
@@ -172,7 +166,11 @@ export function AddNote() {
                 </Pressable>
 
                 {/*Archive Button*/}
-                <Pressable>
+                <Pressable onPress={() => {
+                    handleSubmitArchiveNote();
+                    addNoteToFirestore(notesDataFirebase.title, notesDataFirebase.notes, notesDataFirebase.isPinned = true, notesDataFirebase.archive = true);
+                    SendData();
+                }}>
                     <Image
                         source={require('../images/archive.png')}
                         style={{
