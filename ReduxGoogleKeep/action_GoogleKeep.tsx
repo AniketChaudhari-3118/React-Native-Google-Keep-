@@ -10,4 +10,10 @@ export function addNotesData(notesData: any) {
     };
 }
 
+export function searchData(pinnedData: any, othersData: any) {
+    return {
+        type: SET_DATA,
+        data: pinnedData, othersData
+    }
+}
 

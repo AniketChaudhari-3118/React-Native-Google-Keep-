@@ -1,5 +1,5 @@
 
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import BottomViewAddNote from "./BottomViewAddNote";
 import React, { useState } from "react";
@@ -7,7 +7,9 @@ import { useDispatch } from "react-redux";
 import { addNotesData } from "../ReduxGoogleKeep/action_GoogleKeep";
 import firestore, { doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { db } from './SqlDatabaseConnection'
+import { db } from './SqlDatabaseConnection';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import PushNotification from 'react-native-push-notification';
 
 
 export const addNoteToFirestore = async (title: string, description: string, isPinned: boolean, archive: boolean) => {
@@ -15,7 +17,6 @@ export const addNoteToFirestore = async (title: string, description: string, isP
     const db = getFirestore();
     const user = auth().currentUser;  // Get the currently authenticated user
     try {
-
         if (user) {  // Check if the user is authenticated
             await setDoc(doc(db, "notes", user.uid, "doc", title), {
                 //This constructs the document reference where the note will be stored. The setDoc function writes data to the Firestore database
@@ -35,13 +36,28 @@ export const addNoteToFirestore = async (title: string, description: string, isP
 };
 
 export function AddNote() {
-
     const [notesDataFirebase, setNotesDataFirebase] = useState({ title: "", notes: "", isPinned: false, archive: false });
     const [notesData, setNotesData] = useState({ title: "", notes: "", isPinned: false, archive: false });
 
+    const [date, setDate] = useState(new Date());
+    const [showPicker, setShowPicker] = useState(false);
+
+    const onChange = (event: DateTimePickerEvent, selectedDate: Date) => {
+        const currentDate = selectedDate || date;
+        setShowPicker(Platform.OS === 'android')
+        setDate(currentDate);
+    }
+    const scheduleReminder = () => {
+        PushNotification.localNotificationSchedule({
+            message: "It's time to check your note!",
+            date: date, // The selected date and time for the reminder
+        });
+    };
+
+
+
 
     const dispatch = useDispatch();
-
     //const NotesData: any = useSelector((state: any) => state.reducer); 
 
     const SendData = () => {
@@ -50,7 +66,7 @@ export function AddNote() {
                 `insert into notesdata (title, description) values (?, ?)`,
                 [notesData.title, notesData.notes],
                 () => {
-                    console.warn('Note added Successfully in SQLite');
+                    // console.warn('Note added Successfully in SQLite');
                 },
                 (error) => {
                     console.error('Error adding Note', error);
@@ -150,7 +166,7 @@ export function AddNote() {
                 </Pressable>
 
                 {/*Remainder Button*/}
-                <Pressable>
+                <Pressable onPress={() => setShowPicker(true)}>
                     <Image
                         source={require('../images/remainderBell.png')}
                         style={{
@@ -164,6 +180,17 @@ export function AddNote() {
                         resizeMode="contain"  // Contain the image within the defined size
                     />
                 </Pressable>
+                {
+                    showPicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="datetime"
+                            display="default"
+                            onChange={() => { onChange; scheduleReminder() }}
+                        />
+                    )
+                }
+
 
                 {/*Archive Button*/}
                 <Pressable onPress={() => {

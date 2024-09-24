@@ -11,8 +11,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { SigninPage } from './components/SigninPage'
 import { LoginPage } from './components/LoginPage'
 import { DrawerView } from './components/DrawerView'
-// import { Header } from './components/AddNoteView';
 import { AddNote } from './components/AddNoteView';
+import { SearchNotes } from './components/SearchNotes';
 
 
 const Stack = createNativeStackNavigator();
@@ -62,6 +62,9 @@ function App() {
             fontSize: 25
           }
         }} />
+
+        <Stack.Screen name='SearchNotes' component={SearchNotes} options={{ headerShown: false }} />
+
       </Stack.Navigator>
     </NavigationContainer>
 

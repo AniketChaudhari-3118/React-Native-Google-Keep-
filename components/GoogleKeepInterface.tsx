@@ -9,9 +9,12 @@ import { addNoteToFirestore } from './AddNoteView';
 import auth from '@react-native-firebase/auth';
 import { db } from './SqlDatabaseConnection';
 import NetInfo from "@react-native-community/netinfo";
+import { useDispatch } from 'react-redux';
+import { searchData } from '../ReduxGoogleKeep/action_GoogleKeep';
 
 
 export const GoogleKeepInterface = (props: any) => {
+
   const [listView, setListView] = useState(true);
   const [getNotesIsPinned, setGetNotesIsPinned] = useState([{}]);
   const [getNotesOthers, setGetNotesOthers] = useState([{}]);
@@ -53,6 +56,10 @@ export const GoogleKeepInterface = (props: any) => {
   const notesPinned = getNotesIsPinned;
   const notesOthers = getNotesOthers;
 
+  //to send the data to searchNotes screen
+  const dispatch = useDispatch();
+  dispatch(searchData(notesPinned, notesOthers))
+
   useEffect(() => {
     NetInfo.fetch().then(async (state) => {
       if (state.isConnected) {
@@ -81,7 +88,7 @@ export const GoogleKeepInterface = (props: any) => {
           </Pressable>
 
           {/*Text Input (Search)*/}
-          <TextInput
+          <TextInput onFocus={() => props.navigation.navigate('SearchNotes')}
             style={styles.TextInputSearch}
             placeholder="Search your notes" />
 

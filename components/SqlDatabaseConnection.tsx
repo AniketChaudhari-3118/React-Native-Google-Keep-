@@ -9,7 +9,7 @@ export const db = SQLite.openDatabase(
         location: 'default'
     },
     () => {
-        console.warn('Database opened Successfully');
+        //console.warn('Database opened Successfully');
     },
     (error) => {
         console.error('Error Opening Database', error);
@@ -26,7 +26,7 @@ db.transaction((tx) => {
     );`,
         [],
         () => {
-            console.warn('Table created successfully');
+            //console.warn('Table created successfully');
         },
         (error) => {
             console.error('Error creating table', error);

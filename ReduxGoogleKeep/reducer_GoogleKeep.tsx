@@ -1,4 +1,4 @@
-import {  SET_DATA } from "./constants_GoogleKeep";
+import { SET_DATA } from "./constants_GoogleKeep";
 
 
 const initialState: any[] = [];
@@ -10,7 +10,8 @@ export const reducer = (state = initialState, action: any) => {
                 ...state,
                 action?.data
             ];
-        
+
+
         default:
             return state
     }

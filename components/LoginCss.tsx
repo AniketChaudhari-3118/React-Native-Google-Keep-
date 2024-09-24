@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
     flex: 1
   },
   loginView: {
-    marginTop: "28%"
+    marginTop: "8%"
   },
   email: {
     fontSize: 22,
@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
     fontSize: 22,
     padding: 6,
     marginLeft: "16.5%",
-    marginTop: "3%"
+    marginTop: "1.5%"
   },
   enterEmail: {
     backgroundColor: 'white',
@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     marginLeft: "18.5%",
     marginRight:"18.5%",
-    marginTop: "8%",
+    marginTop: "5%",
     backgroundColor: 'lightblue',
     height: "8%",
     shadowColor: 'grey',
@@ -51,15 +51,15 @@ export const styles = StyleSheet.create({
     marginTop: "3%"
   },
   login_With: {
-    fontSize: 22,
+    fontSize: 20,
     padding: 3,
     fontWeight: '500',
     marginTop: 25,
-    marginLeft: "31%"
+    marginLeft: "8%"
   },
   image: {
-    height: "180%",
-    width: 38,
+    height: "160%",
+    width: 35,
     marginTop: "23%"
   },
   termsView: {
@@ -79,6 +79,19 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
     padding: 3,
     backgroundColor: 'lightgrey'
+  },
+  enterPhoneNumber: {
+    backgroundColor: 'white',
+    width: "63.5%",
+    alignSelf: 'center',
+    borderCurve: 'circular',
+    borderRadius: 10,
+    borderColor: 'grey',
+    marginTop: "1%"
+  },
+  sendCode: {
+    marginTop: "2%",
+    textAlign: 'center'
   }
 
 })
