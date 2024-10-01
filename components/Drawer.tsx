@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Button, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { GoogleKeepInterface } from './GoogleKeepInterface';
-import { db } from './SqlDatabaseConnection';
 import { auth, firestore } from '../firebase';
 import NetInfo from "@react-native-community/netinfo";
 import { AddNote } from './AddNoteView';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+
 
 const Drawer = createDrawerNavigator();
 

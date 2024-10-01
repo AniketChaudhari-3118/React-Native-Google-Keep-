@@ -20,7 +20,7 @@ export const LoginPage = (props: any) => {
 
   const onLogin = async () => {
     try {
-      const userCredential = await auth().signInWithEmailAndPassword("ra@gm.com", "pass123");
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
       props.navigation.navigate('DrawerView')
     } catch (error) {
       console.error('Error Loging in:', error);
@@ -30,6 +30,7 @@ export const LoginPage = (props: any) => {
   const sendVerifactionCode = async () => {
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      console.log("Hello");
       if (confirmation.verificationId)
         setVerifactionId(confirmation.verificationId);
       setMessage('Verification code sent')
