@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react";
-import { Image, Pressable, TextInput, View } from "react-native";
+import { useState } from "react";
+import { Text } from "react-native";
+import { Image, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useSelector } from "react-redux";
 
 
 export function SearchNotes(props: any) {
     const NotesData: any = useSelector((state: any) => state.reducer);
     // console.warn(NotesData);
+    const [finaldata, setFinaldata] = useState<any[]>([]);
+
+    {/*Destructure the data taken using redux*/ }
     const { pinnedNotes, otherNotes } = NotesData;
     const allNotes = [...pinnedNotes, ...otherNotes];
 
@@ -16,7 +20,8 @@ export function SearchNotes(props: any) {
             note.title.toLowerCase().includes(query.toLowerCase())
         );
 
-        console.warn(result);
+        // console.warn(result);
+        setFinaldata(result);
     }
 
     return (
@@ -41,9 +46,32 @@ export function SearchNotes(props: any) {
             </View>
 
             <View style={{ flex: 9, backgroundColor: 'ghostwhite' }}>
-
+                <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {
+                        finaldata.map((item: any) => <Text style={styles.item}>
+                            {`${item.title} \n\n ${item.description}`}</Text>)
+                    }
+                </View>
             </View>
 
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    item: {
+        borderWidth: 0.5,
+        borderRadius: 10,
+        fontSize: 15,
+        backgroundColor: 'ghostwhite',
+        color: '#000',
+        margin: 10,
+        marginLeft: "4%",
+        marginRight: "3%",
+        padding: 11,
+        width: "42%",
+        height: 100,
+        shadowColor: 'black',
+        elevation: 5
+    },
+})

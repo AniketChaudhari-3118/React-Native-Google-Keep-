@@ -1,7 +1,7 @@
 // components/GoogleKeepInterface.tsx
 
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import BottomTab from './BottomView';
 import firestore from '@react-native-firebase/firestore';
@@ -18,6 +18,9 @@ export const GoogleKeepInterface = (props: any) => {
   const [listView, setListView] = useState(true);
   const [getNotesIsPinned, setGetNotesIsPinned] = useState([{}]);
   const [getNotesOthers, setGetNotesOthers] = useState([{}]);
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   //const NotesData: any = useSelector((state: any) => state.reducer);
   //console.warn(NotesData);
@@ -123,8 +126,11 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ marginBottom: "15%" }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notesPinned.map((item: any) => <Text style={styles.item}>
-                      {`${item.title} \n\n ${item.description}`}</Text>)
+                    notesPinned.map((item: any) => <TouchableOpacity onPress={() => {
+                      setShowModal(true); setTitle(item.title);
+                      setDescription(item.description)
+                    }} style={styles.item}><Text >
+                        {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)
                   }
                 </View>
               </View>
@@ -134,7 +140,11 @@ export const GoogleKeepInterface = (props: any) => {
               < View style={{ marginBottom: "100%" }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notesOthers.map((item: any) => <Text style={styles.item}>{`${item.title} \n\n ${item.description}`}</Text>)
+                    notesOthers.map((item: any) => <TouchableOpacity onPress={() => {
+                      setShowModal(true); setTitle(item.title);
+                      setDescription(item.description)
+                    }} style={styles.item}><Text>
+                        {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)
                   }
                 </View>
               </View>
@@ -144,8 +154,11 @@ export const GoogleKeepInterface = (props: any) => {
               <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "5%" }}>Pinned</Text>
               <View style={{ marginBottom: "0%" }}>
                 <View style={{ flex: 1 }}>
-                  {notesPinned.map((item: any) => <Text style={styles.itemListView}>
-                    {`${item.title} \n\n ${item.description}`}</Text>)}
+                  {notesPinned.map((item: any) => <TouchableOpacity onPress={() => {
+                    setShowModal(true); setTitle(item.title);
+                    setDescription(item.description)
+                  }} style={styles.itemListView}><Text>
+                      {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)}
                 </View>
               </View>
 
@@ -153,14 +166,41 @@ export const GoogleKeepInterface = (props: any) => {
               <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "20%" }}>Others</Text>
               <View style={{ marginBottom: "50%" }}>
                 <View style={{ flex: 1 }}>
-                  {notesOthers.map((item: any) => <Text style={styles.itemListView}>
-                    {`${item.title} \n\n ${item.description}`}</Text>)}
+                  {notesOthers.map((item: any) => <TouchableOpacity onPress={() => {
+                    setShowModal(true); setTitle(item.title);
+                    setDescription(item.description)
+                  }} style={styles.itemListView}><Text>
+                      {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)}
                 </View>
               </View>
             </>
         }
 
       </ScrollView>
+
+      {/*To show the modal when we press on a note*/}
+      {
+        showModal &&
+        <View style={styles.main}>
+          <Modal
+            transparent={true}
+            visible={showModal}
+            animationType="slide"
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={styles.modalText}>{title}</Text>
+                  <TouchableOpacity style={{}} onPress={() => setShowModal(false)}>
+                    <Image source={require('../images/CloseModal.png')} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.modalText}>{description}</Text>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      }
 
       {/*Add note button*/}
       <Pressable style={styles.addNoteButtonContainer} onPress={() => props.navigation.navigate('AddNote')} >
@@ -290,6 +330,34 @@ const styles = StyleSheet.create({
     elevation: 5
 
   },
+
+  //styling for dialog box
+  main: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  buttonView: {
+    flex: 1,
+    justifyContent: 'flex-end'
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
+    backgroundColor: '#fff',
+    padding: 30,
+    borderRadius: 20,
+    shadowColor: 'black',
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 25,
+    marginBottom: 20,
+    marginRight: "45%"
+  }
 
 })
 
