@@ -10,6 +10,7 @@ import store from './ReduxGoogleKeep/store_GoogleKeep.tsx'
 
 
 const AppRedux = () => (
+
     <Provider store={store} >
         <App />
     </Provider>

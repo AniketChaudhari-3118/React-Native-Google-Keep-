@@ -1,6 +1,12 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  darkTheme: {
+    backgroundColor: 'black'
+  },
+  lightTheme: {
+    backgroundColor: 'gray'
+  },
   main: {
     flex: 1
   },
@@ -30,7 +36,7 @@ export const styles = StyleSheet.create({
     borderColor: 'skyblue',
     borderWidth: 1,
     marginLeft: "18.5%",
-    marginRight:"18.5%",
+    marginRight: "18.5%",
     marginTop: "5%",
     backgroundColor: 'lightblue',
     height: "8%",

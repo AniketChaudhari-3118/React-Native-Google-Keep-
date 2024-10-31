@@ -1,85 +1,60 @@
 // components/GoogleKeepInterface.tsx
 
 import React, { useEffect, useState } from 'react';
-import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import BottomTab from './BottomView';
-import firestore from '@react-native-firebase/firestore';
-import { addNoteToFirestore } from './AddNoteView';
-import auth from '@react-native-firebase/auth';
-import { db } from './SqlDatabaseConnection';
-import NetInfo from "@react-native-community/netinfo";
-import { useDispatch } from 'react-redux';
-import { searchData } from '../ReduxGoogleKeep/action_GoogleKeep';
+import useFetchNotes from './fetchDataCustomHook';
+import axios from 'axios';
+import { auth, firestore } from '../firebase';
 
 
 export const GoogleKeepInterface = (props: any) => {
 
   const [listView, setListView] = useState(true);
-  const [getNotesIsPinned, setGetNotesIsPinned] = useState([{}]);
-  const [getNotesOthers, setGetNotesOthers] = useState([{}]);
   const [showModal, setShowModal] = useState(false);
+
+  //to store title and description for displaying on modal/dialog box
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [noteId, setNoteId] = useState("");
 
-  //const NotesData: any = useSelector((state: any) => state.reducer);
-  //console.warn(NotesData);
-  //const notesPinned = NotesData.filter((note: any) => note.isPinned);
-  //const notesOthers = NotesData.filter((note: any) => !note.isPinned);
-  const fetchNotesFromLocal = async () => {
-    try {
-      const results = await db.executeSql('SELECT * FROM notes');
-      console.warn(results);
+  //to let know the addNote that to place the data or not
+  const [place, setPlace] = useState(false);
+  const { notesPinned, notesOthers } = useFetchNotes(title, description, place);
 
-      const rows = results[0].rows;
-      const notes = [];
-      for (let i = 0; i < rows.length; i++) {
-        notes.push(rows.item(i));
-      }
-      return notes;
-    } catch (error) {
-      console.error('Error fetching notes from SQLite: ', error);
-      return [];
-    }
-  }
+  const [data, setData] = useState(); //to store the data fetched from api's
 
-  const fetchNotesFromFirebase = async () => {
+  const deleteNoteFromFirebase = async (noteId: string) => {
     const user = auth().currentUser;
     if (user) {
-      const notesCollectionIsPinned = await firestore().collection('notes').doc(user.uid).collection("doc").where('isPinned', "==", true).get();  // Filter by the user's unique ID
-      // console.warn(notesCollectionIsPinned.docs);
-      const notesCollectionOthers = await firestore().collection('notes').doc(user.uid).collection("doc").where('isPinned', "==", false).get();
-      setGetNotesIsPinned(notesCollectionIsPinned.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // (isPinned) get the all the data as an object and store all the objects in one array(array of objects)
-      setGetNotesOthers(notesCollectionOthers.docs.map(doc => ({ id: doc.id, ...doc.data() }))); // (isPinned) get the all the data as an object and store all the objects in one array(array of objects)
+      try {
+        // Reference to the specific note document for the signed-in user
+        await firestore()
+          .collection('notes')
+          .doc(user.uid)
+          .collection('doc')
+          .doc(noteId)
+          .delete();
+        console.log('Note deleted successfully');
+      } catch (error) {
+        console.error('Error deleting note:', error);
+      }
     } else {
       console.error('No user is signed in.');
     }
-  }
-
-  const notesPinned = getNotesIsPinned;
-  const notesOthers = getNotesOthers;
-
-  //to send the data to searchNotes screen
-  const dispatch = useDispatch();
-  dispatch(searchData(notesPinned, notesOthers))
+  };
 
   useEffect(() => {
-    NetInfo.fetch().then(async (state) => {
-      if (state.isConnected) {
-        try {
-          fetchNotesFromFirebase();
-        } catch (error) {
-          console.error("Error fetching data from Firebase: ", error);
-        }
-      } else {
-        console.warn("User Offline");
-        setGetNotesIsPinned(await fetchNotesFromLocal());
-      }
-    })
-  }, [addNoteToFirestore])
+    axios.get('http://localhost:3000/api/v1/notes/fetch')
+      .then(response => setData(response.data))
+      .catch(error => console.error(error));
+    console.warn(data);
+    console.warn("hello");
+  }, [])
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'white' }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
 
       <ScrollView style={{ marginBottom: 40, backgroundColor: 'ghostwhite' }}>
         {/*Search bar*/}
@@ -126,10 +101,15 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ marginBottom: "15%" }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notesPinned.map((item: any) => <TouchableOpacity onPress={() => {
-                      setShowModal(true); setTitle(item.title);
+                    notesPinned.map((item: any) => <TouchableOpacity key={item.id} onLongPress={() => {
+                      props.navigation.navigate('AddNote'); setTitle(item.title); setPlace(true);
                       setDescription(item.description)
-                    }} style={styles.item}><Text >
+                    }}
+                      onPress={() => {
+                        setShowModal(true); setTitle(item.title);
+                        setDescription(item.description);
+                        setNoteId(item.id);
+                      }} style={styles.item}><Text >
                         {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)
                   }
                 </View>
@@ -140,10 +120,16 @@ export const GoogleKeepInterface = (props: any) => {
               < View style={{ marginBottom: "100%" }}>
                 <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap' }}>
                   {
-                    notesOthers.map((item: any) => <TouchableOpacity onPress={() => {
-                      setShowModal(true); setTitle(item.title);
-                      setDescription(item.description)
-                    }} style={styles.item}><Text>
+                    notesOthers.map((item: any) => <TouchableOpacity key={item.id} onLongPress={() => {
+                      props.navigation.navigate('AddNote'); setTitle(item.title); setPlace(true);
+                      setDescription(item.description);
+                      setNoteId(item.id);
+                    }}
+                      onPress={() => {
+                        setShowModal(true); setTitle(item.title);
+                        setDescription(item.description);
+                        setNoteId(item.id);
+                      }} style={styles.item}><Text>
                         {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)
                   }
                 </View>
@@ -154,10 +140,15 @@ export const GoogleKeepInterface = (props: any) => {
               <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "5%" }}>Pinned</Text>
               <View style={{ marginBottom: "0%" }}>
                 <View style={{ flex: 1 }}>
-                  {notesPinned.map((item: any) => <TouchableOpacity onPress={() => {
-                    setShowModal(true); setTitle(item.title);
+                  {notesPinned.map((item: any) => <TouchableOpacity key={item.id} onLongPress={() => {
+                    props.navigation.navigate('AddNote'); setTitle(item.title); setPlace(true);
                     setDescription(item.description)
-                  }} style={styles.itemListView}><Text>
+                  }}
+                    onPress={() => {
+                      setShowModal(true); setTitle(item.title);
+                      setDescription(item.description);
+                      setNoteId(item.id);
+                    }} style={styles.itemListView}><Text>
                       {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)}
                 </View>
               </View>
@@ -166,10 +157,15 @@ export const GoogleKeepInterface = (props: any) => {
               <Text style={{ fontSize: 20, marginLeft: "5%", marginTop: "20%" }}>Others</Text>
               <View style={{ marginBottom: "50%" }}>
                 <View style={{ flex: 1 }}>
-                  {notesOthers.map((item: any) => <TouchableOpacity onPress={() => {
-                    setShowModal(true); setTitle(item.title);
+                  {notesOthers.map((item: any) => <TouchableOpacity key={item.id} onLongPress={() => {
+                    props.navigation.navigate('AddNote'); setTitle(item.title); setPlace(true);
                     setDescription(item.description)
-                  }} style={styles.itemListView}><Text>
+                  }}
+                    onPress={() => {
+                      setShowModal(true); setTitle(item.title);
+                      setDescription(item.description);
+                      setNoteId(item.id);
+                    }} style={styles.itemListView}><Text>
                       {`${item.title} \n\n ${item.description}`}</Text></TouchableOpacity>)}
                 </View>
               </View>
@@ -179,28 +175,37 @@ export const GoogleKeepInterface = (props: any) => {
       </ScrollView>
 
       {/*To show the modal when we press on a note*/}
-      {
-        showModal &&
-        <View style={styles.main}>
-          <Modal
-            transparent={true}
-            visible={showModal}
-            animationType="slide"
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <View style={{ flexDirection: 'row' }}>
-                  <Text style={styles.modalText}>{title}</Text>
-                  <TouchableOpacity style={{}} onPress={() => setShowModal(false)}>
-                    <Image source={require('../images/CloseModal.png')} />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.modalText}>{description}</Text>
+      {showModal && (
+        <Modal
+
+          transparent={true}
+          visible={showModal}
+          animationType="slide"
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+
+              {/*To display Title and Description on Modal*/}
+              <Text style={styles.modalText}>{title}</Text>
+              <Text style={styles.modalText}>{description}</Text>
+
+              <View style={{ flexDirection: 'row' }}>
+                {/* Delete Button */}
+                <TouchableOpacity onPress={() => deleteNoteFromFirebase(noteId)} style={{ marginRight: "10%" }} >
+                  <Text style={{ color: 'red' }}>Delete Note</Text>
+                </TouchableOpacity>
+
+                {/* Close Button */}
+                <TouchableOpacity onPress={() => setShowModal(false)}>
+                  <Text style={{ color: 'blue' }}>Close</Text>
+                </TouchableOpacity>
               </View>
+
             </View>
-          </Modal>
-        </View>
-      }
+          </View>
+
+        </Modal>
+      )}
 
       {/*Add note button*/}
       <Pressable style={styles.addNoteButtonContainer} onPress={() => props.navigation.navigate('AddNote')} >
@@ -218,6 +223,12 @@ export const GoogleKeepInterface = (props: any) => {
 
 
 const styles = StyleSheet.create({
+  whiteText: {
+    color: '#FFFFFF'
+  },
+  darkText: {
+    color: '#000000'
+  },
   SearchBar: {
     flexDirection: 'row',
     marginLeft: 15,

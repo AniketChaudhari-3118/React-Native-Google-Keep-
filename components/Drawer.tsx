@@ -120,7 +120,7 @@ export default function Drawer1() {
             source={require('../images/trash.png')}
             style={{ width: 25, height: 25, tintColor: color }}
             resizeMode="contain"
-          />
+          />  
         ),
       }} />
 

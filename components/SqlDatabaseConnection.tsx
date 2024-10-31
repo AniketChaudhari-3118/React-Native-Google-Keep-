@@ -26,7 +26,7 @@ db.transaction((tx) => {
     );`,
         [],
         () => {
-            //console.warn('Table created successfully');
+            //Aniket@123console.warn('Table created successfully');
         },
         (error) => {
             console.error('Error creating table', error);

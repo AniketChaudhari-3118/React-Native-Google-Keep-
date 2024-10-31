@@ -3,7 +3,7 @@ import { Image, Platform, Pressable, Text, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import BottomViewAddNote from "./BottomViewAddNote";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addNotesData } from "../ReduxGoogleKeep/action_GoogleKeep";
 import firestore, { doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -41,6 +41,13 @@ export function AddNote() {
 
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
+
+    //collect the data from redux for placing the title and description for editing the note
+    const NoteData: any = useSelector((state: any) => state.reducer);
+    const { title, description, value } = NoteData;
+    const recievedNote = [title, description, value];
+    console.warn(recievedNote);
+
 
     const onChange = (event: DateTimePickerEvent, selectedDate: Date) => {
         const currentDate = selectedDate || date;
@@ -211,6 +218,7 @@ export function AddNote() {
                         resizeMode="contain"  // Contain the image within the defined size
                     />
                 </Pressable>
+
 
             </View>
 

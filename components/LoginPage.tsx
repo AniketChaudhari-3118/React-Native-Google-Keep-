@@ -1,14 +1,20 @@
 
 import { TextInput } from 'react-native-paper'
-import { Image, Pressable, Text, TouchableHighlight, View } from 'react-native';
+import { Image, Pressable, Text, TouchableHighlight, View, Appearance } from 'react-native';
 import { useState } from 'react';
 import { styles } from './LoginCss'
 import auth from '@react-native-firebase/auth'
 import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
-import LinearGradient from 'react-native-linear-gradient';
+import React from 'react';
 
 
 export const LoginPage = (props: any) => {
+
+  const [theme, setTheme] = useState(Appearance.getColorScheme());
+  Appearance.addChangeListener((scheme => {
+    setTheme(scheme.colorScheme);
+  }))
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -48,7 +54,7 @@ export const LoginPage = (props: any) => {
       setMessage(`Error: ${error}`);
     }
   }
-
+  // style={theme === "dark" ? styles.darkTheme : styles.lightTheme}
   return (
     <GestureHandlerRootView>
       <View style={styles.main}>
