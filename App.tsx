@@ -18,7 +18,7 @@ import { SearchNotes } from './components/SearchNotes';
 const Stack = createNativeStackNavigator();
 
 function App() {
-  
+
   return (
     <NavigationContainer>
       <Stack.Navigator>

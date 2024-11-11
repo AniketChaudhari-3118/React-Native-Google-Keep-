@@ -57,6 +57,9 @@ const useFetchNotes = (title: string, description: string, place: boolean) => {
     dispatch(placeData(title, description, place))
 
 
+    
+
+
 
     useEffect(() => {
         NetInfo.fetch().then(async (state) => {

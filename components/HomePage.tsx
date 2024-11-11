@@ -7,23 +7,30 @@ import BottomTab from './BottomView';
 import useFetchNotes from './fetchDataCustomHook';
 import axios from 'axios';
 import { auth, firestore } from '../firebase';
+import { styles } from './HomePageCss'
 
 
-export const GoogleKeepInterface = (props: any) => {
+export const HomePage = (props: any) => {
 
   const [listView, setListView] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showModalUpdate, setShowModalUpdate] = useState(false);
 
   //to store title and description for displaying on modal/dialog box
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [noteId, setNoteId] = useState("");
 
+  //to update title and description for displaying on modal/dialog box
+  const [updateTitle, setUpdateTitle] = useState("");
+  const [updateDescription, setUpdateDescription] = useState("");
+
   //to let know the addNote that to place the data or not
   const [place, setPlace] = useState(false);
   const { notesPinned, notesOthers } = useFetchNotes(title, description, place);
 
-  const [data, setData] = useState(); //to store the data fetched from api's
+  // const [data, setData] = useState(); //to store the data fetched from api's
+
 
   const deleteNoteFromFirebase = async (noteId: string) => {
     const user = auth().currentUser;
@@ -45,13 +52,42 @@ export const GoogleKeepInterface = (props: any) => {
     }
   };
 
-  useEffect(() => {
-    axios.get('http://localhost:3000/api/v1/notes/fetch')
-      .then(response => setData(response.data))
-      .catch(error => console.error(error));
-    console.warn(data);
-    console.warn("hello");
-  }, [])
+
+  const updateNoteFromFirebase = async (noteId: string) => {
+    const user = auth().currentUser;
+
+    if (user) {
+      try {
+        // Use existing title and description if new ones are not provided
+        const newTitle = updateTitle || title;
+        const newDescription = updateDescription || description;
+
+        await firestore()
+          .collection('notes')
+          .doc(user.uid)
+          .collection('doc')
+          .doc(noteId)
+          .update({
+            title: newTitle,         // new title value
+            description: newDescription // new description value
+          });
+        setShowModalUpdate(false);
+        console.warn("Note updated successfully!");
+      } catch (error) {
+        console.error("Error updating note: ", error);
+      }
+    } else {
+      console.error("User is not authenticated.");
+    }
+  }
+
+  // node data fetch
+  // useEffect(() => {
+  //   axios.get('http://localhost:3000/api/v1/notes/fetch')
+  //     .then(response => setData(response.data))
+  //     .catch(error => console.error(error));
+  //   console.warn(data);
+  // }, [])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -192,7 +228,12 @@ export const GoogleKeepInterface = (props: any) => {
               <View style={{ flexDirection: 'row' }}>
                 {/* Delete Button */}
                 <TouchableOpacity onPress={() => deleteNoteFromFirebase(noteId)} style={{ marginRight: "10%" }} >
-                  <Text style={{ color: 'red' }}>Delete Note</Text>
+                  <Text style={{ color: 'red' }}>Delete</Text>
+                </TouchableOpacity>
+
+                {/*Update Button*/}
+                <TouchableOpacity onPress={() => setShowModalUpdate(true)} style={{ marginRight: "50%" }} >
+                  <Text style={{ color: 'green' }}>Update</Text>
                 </TouchableOpacity>
 
                 {/* Close Button */}
@@ -206,6 +247,38 @@ export const GoogleKeepInterface = (props: any) => {
 
         </Modal>
       )}
+
+
+      {/*To show modal when we press the update button*/}
+      <Modal visible={showModalUpdate} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.dialogBox}>
+            <Text style={styles.title}>Update Note</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Title"
+              value={updateTitle}
+              onChangeText={(value) => setUpdateTitle(value)}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Description"
+              value={updateDescription}
+              onChangeText={(value) => setUpdateDescription(value)}
+              multiline
+            />
+
+            <View style={styles.buttonContainer}>
+              <Button title="Update" onPress={() => updateNoteFromFirebase(noteId)} />
+              <Button title="Cancel" color="red" onPress={() => setShowModalUpdate(false)} />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+
 
       {/*Add note button*/}
       <Pressable style={styles.addNoteButtonContainer} onPress={() => props.navigation.navigate('AddNote')} >
@@ -222,154 +295,5 @@ export const GoogleKeepInterface = (props: any) => {
 };
 
 
-const styles = StyleSheet.create({
-  whiteText: {
-    color: '#FFFFFF'
-  },
-  darkText: {
-    color: '#000000'
-  },
-  SearchBar: {
-    flexDirection: 'row',
-    marginLeft: 15,
-    marginRight: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 35,
-    marginTop: 20,
-    marginBottom: 10,
-    shadowColor: 'grey',
-    elevation: 2,
-    backgroundColor: "aliceblue",
-    borderWidth: 0.5
-  },
-  DrawerButton: {
-    flex: 1,
-    height: '80%',
-    width: '100%',
-    marginLeft: 15,
-    marginBottom: 5
-  },
-  DrawerButtonText: {
-    textAlign: 'center',
-    fontSize: 30
-  },
-  TextInputSearch: {
-    fontSize: 20,
-    flex: 7,
-    marginLeft: 8
-  },
-  ListGridView: {
-    flex: 1.5,
-    height: "60%",
-    marginRight: 20
-  },
-  GridView: {
-    flex: 1.5,
-    width: '100%',
-    marginRight: 45
-  },
-  ListView: {
-    flex: 1.5,
-    width: '100%',
-    height: "50%",
-    marginRight: 45
-  },
-  AccountImagePress: {
-    flex: 1.5,
-    height: "80%",
-    width: "40%",
-    marginRight: 30
-  },
-  AccountImage: {
-    height: "100%",
-    width: "100%",
-    borderRadius: 25
-  },
-  item: {
-    borderWidth: 0.5,
-    borderRadius: 10,
-    fontSize: 15,
-    backgroundColor: 'ghostwhite',
-    color: '#000',
-    margin: 10,
-    marginLeft: "6%",
-    padding: 11,
-    width: "40%",
-    height: 100,
-    shadowColor: 'black',
-    elevation: 5
-  },
-  itemListView: {
-    borderWidth: 0.5,
-    borderRadius: 10,
-    fontSize: 15,
-    backgroundColor: 'ghostwhite',
-    color: '#000',
-    margin: 4,
-    marginLeft: "5%",
-    padding: 11,
-    width: "90%",
-    height: 100,
-    shadowColor: 'black',
-    elevation: 5
-  },
-  bottomTabContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: 'red',
-    color: 'red',
-    shadowColor: '#CCCCFF',
-    elevation: 5
-  },
-  addNoteButtonContainer: {
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: 20,  // Adjust based on how much you want it to overlap
-    right: 50,   // Align to the right side
-    width: 58,
-    height: 60,
-    borderRadius: 18,
-    borderWidth: 5,
-    borderColor: 'ghostwhite',
-    backgroundColor: '#CCCCFF',
-    zIndex: 12,
-    shadowColor: '#CCCCFF',
-    elevation: 5
-
-  },
-
-  //styling for dialog box
-  main: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  buttonView: {
-    flex: 1,
-    justifyContent: 'flex-end'
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalView: {
-    backgroundColor: '#fff',
-    padding: 30,
-    borderRadius: 20,
-    shadowColor: 'black',
-    elevation: 5,
-  },
-  modalText: {
-    fontSize: 25,
-    marginBottom: 20,
-    marginRight: "45%"
-  }
-
-})
 
 

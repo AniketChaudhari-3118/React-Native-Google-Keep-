@@ -8,8 +8,6 @@ import { addNotesData } from "../ReduxGoogleKeep/action_GoogleKeep";
 import firestore, { doc, getFirestore, setDoc } from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { db } from './SqlDatabaseConnection';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import PushNotification from 'react-native-push-notification';
 
 
 export const addNoteToFirestore = async (title: string, description: string, isPinned: boolean, archive: boolean) => {
@@ -39,28 +37,11 @@ export function AddNote() {
     const [notesDataFirebase, setNotesDataFirebase] = useState({ title: "", notes: "", isPinned: false, archive: false });
     const [notesData, setNotesData] = useState({ title: "", notes: "", isPinned: false, archive: false });
 
-    const [date, setDate] = useState(new Date());
-    const [showPicker, setShowPicker] = useState(false);
-
     //collect the data from redux for placing the title and description for editing the note
     const NoteData: any = useSelector((state: any) => state.reducer);
     const { title, description, value } = NoteData;
     const recievedNote = [title, description, value];
     console.warn(recievedNote);
-
-
-    const onChange = (event: DateTimePickerEvent, selectedDate: Date) => {
-        const currentDate = selectedDate || date;
-        setShowPicker(Platform.OS === 'android')
-        setDate(currentDate);
-    }
-    const scheduleReminder = () => {
-        PushNotification.localNotificationSchedule({
-            message: "It's time to check your note!",
-            date: date, // The selected date and time for the reminder
-        });
-    };
-
 
 
 
@@ -92,7 +73,7 @@ export function AddNote() {
         setNotesData((prev) => ({
             ...prev,
             [name]: value,
-        }));
+        }));    
     };
 
     const handleSubmitAddNote = () => {
@@ -130,7 +111,7 @@ export function AddNote() {
                 style={{ margin: 10, fontSize: 20, borderRadius: 10, marginLeft: "3%", marginRight: "3%", height: "5%" }}
                 label="Title"
                 onChangeText={(value) => handleInputChange("title", value)}
-            />
+            />  
 
             {/*TextInput for Notes*/}
             <TextInput
@@ -173,7 +154,7 @@ export function AddNote() {
                 </Pressable>
 
                 {/*Remainder Button*/}
-                <Pressable onPress={() => setShowPicker(true)}>
+                <Pressable>
                     <Image
                         source={require('../images/remainderBell.png')}
                         style={{
@@ -187,16 +168,6 @@ export function AddNote() {
                         resizeMode="contain"  // Contain the image within the defined size
                     />
                 </Pressable>
-                {
-                    showPicker && (
-                        <DateTimePicker
-                            value={date}
-                            mode="datetime"
-                            display="default"
-                            onChange={() => { onChange; scheduleReminder() }}
-                        />
-                    )
-                }
 
 
                 {/*Archive Button*/}

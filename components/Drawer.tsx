@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import { GoogleKeepInterface } from './GoogleKeepInterface';
+import { HomePage } from './HomePage';
 import { auth, firestore } from '../firebase';
 import NetInfo from "@react-native-community/netinfo";
 import { AddNote } from './AddNoteView';
@@ -45,7 +45,7 @@ export default function Drawer1() {
   return (
     <Drawer.Navigator initialRouteName='GoogleKeepInterface'>
 
-      <Drawer.Screen name="Keep" component={GoogleKeepInterface} options={{
+      <Drawer.Screen name="Keep" component={HomePage} options={{
         headerShown: false,
         drawerIcon: () => (
           <Image

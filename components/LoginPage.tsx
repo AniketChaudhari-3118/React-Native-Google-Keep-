@@ -1,6 +1,6 @@
 
 import { TextInput } from 'react-native-paper'
-import { Image, Pressable, Text, TouchableHighlight, View, Appearance } from 'react-native';
+import { Image, Pressable, Text, View, Appearance } from 'react-native';
 import { useState } from 'react';
 import { styles } from './LoginCss'
 import auth from '@react-native-firebase/auth'
